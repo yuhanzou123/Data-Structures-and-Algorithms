@@ -13,22 +13,39 @@
 	};
 	void Jesopy(Node* head, int k) {
 		Node* p = head; Node* q = head;
-		for (;;) {
-			q = p;
+		while (q->next != head) {
+			q = q->next;
+		}
+		if (k == 1) {
+			std::cout << p->data<<' ';
 			p = p->next;
+			while (p != head) {
+				q->next = p->next;
+				std:: cout << p->data<<' ';
+				delete p;
+				p = q->next;
+			}
+			return;
+		}
+		
+		for (;;) {
+			
 			if (p == q) {
 				std::cout << p->data << std::endl;
 				delete p;
 				return;
 			}
+			for (int i = 1; i < k; i++) {
+				q = p;
+				p = p->next;
+			}
 			q->next = p->next;
-			std::cout << p->data << ' ';
+			std::cout << p->data<<' ';
 			delete p;
 			p = q->next;
 		}
 	}
 	int main() {
-		srand(time(0));
 		Node* head = new Node(100);
 		Node* n2 = new Node(20);
 		Node* n3=new Node(30);
