@@ -3,149 +3,117 @@
 using std::cin;
 using std::cout;
 using std::endl;
-class queue
+class LinkQueue
 {
 private:
-	int* arr;
-	int mCur;
-	int front;
-	int rear;
+	struct Node
+	{
+		int data;
+		Node* pre;
+		Node* next;
+		Node(int data = 0)
+			:data(data)
+			,pre(nullptr)
+			,next(nullptr)
+		{}
+	};
+	Node* head;
+	
 public:
-    queue(int size = 10) :
-		mCur(size)
-		,front(0)
-		,rear(0)
+	LinkQueue()
 	{
-		if (size < 2)
+		Node* node = new Node();
+		head = node;
+		head->next = head;
+		head->pre = head;
+	}
+	~LinkQueue()
+	{
+		if (head == head->next)
 		{
-			throw std::invalid_argument("size must be >= 2");
+			delete head;
+			head = nullptr;
 		}
-		arr = new int[size];
-	}
-	// copy constructor
-	queue(const queue& other) : arr(nullptr), mCur(other.mCur), front(other.front), rear(other.rear)
-	{
-		arr = new int[mCur];
-		for (int i = 0; i < mCur; ++i) arr[i] = other.arr[i];
-	}
-	// copy assignment
-	queue& operator=(const queue& other)
-	{
-		if (this == &other) return *this;
-		int* newArr = new int[other.mCur];
-		for (int i = 0; i < other.mCur; ++i) newArr[i] = other.arr[i];
-		delete[] arr;
-		arr = newArr;
-		mCur = other.mCur;
-		front = other.front;
-		rear = other.rear;
-		return *this;
-	}
-	// move constructor
-	queue(queue&& other) noexcept : arr(other.arr), mCur(other.mCur), front(other.front), rear(other.rear)
-	{
-		other.arr = nullptr;
-		other.mCur = 0;
-		other.front = other.rear = 0;
-	}
-	// move assignment
-	queue& operator=(queue&& other) noexcept
-	{
-		if (this == &other) return *this;
-		delete[] arr;
-		arr = other.arr;
-		mCur = other.mCur;
-		front = other.front;
-		rear = other.rear;
-		other.arr = nullptr;
-		other.mCur = 0;
-		other.front = other.rear = 0;
-		return *this;
-	}
-	~queue() 
-	{
-		delete[] arr;
-		arr = nullptr;
+		else {
+			Node* p = head->next;
+			while (p != head)
+			{
+				Node* temp = p;
+				p = p->next;
+				delete temp;
+			}
+			delete head;
+			head = nullptr;
+		}
 	}
 	void push(int val)
 	{
-        if((rear+1)%mCur==front)
-		{
-			throw std::overflow_error("队列已满");
-		}
-		arr[rear] = val;
-		rear = (rear + 1) % mCur;
+		Node* node = new Node(val);
+		Node* p = head->pre;
+		p->next = node;
+		node->pre = p;
+		node->next = head;
+		head->pre = node;
 	}
 	void pop()
 	{
-      if (rear == front)
+		if (head->next == head)
 		{
-			throw std::underflow_error("队列为空");
+			throw std::underflow_error("queue underflow");
 		}
-		front = (front + 1) % mCur;
+		Node* p = head->next;
+		head->next = head->next->next;
+		head->next->pre = head;
+		delete p;
+		p = nullptr;
 	}
-    bool empty() const
+	int front()
 	{
-		if (rear == front)
+		if (head->next == head)
 		{
-			return true;
+			throw std::underflow_error("queue underflow");
 		}
-		return false;
+		return head->next->data;
 	}
- bool full() const
+	int back()
 	{
-		if ((rear + 1) % mCur == front)
+		if (head->next == head)
 		{
-			return true;
+			throw std::underflow_error("queue underflow");
 		}
-		return false;
+		return head->pre->data;
 	}
-  bool find(int val) const
+	bool empty()
 	{
-      if (rear == front)
-		{
-			return false;
-		}
-		for (int i = front; i != rear; i = (i + 1) % mCur)
-		{
-			if (arr[i] == val) return true;
-		}
-		return false;
+		return head->next == head;
 	}
- int frontValue() const
+	int size()
 	{
-		if (rear == front)
+		if (head->next == head)
 		{
-			throw std::underflow_error("队列为空");
+			return 0;
 		}
-		return arr[front];
-	}
-	int backValue() const
-	{
-		if (rear == front)
+		int sum = 1;
+		Node* p = head->next;
+		while (p != head)
 		{
-			throw std::underflow_error("队列为空");
+			sum++;
+			p = p->next;
 		}
-		return arr[(rear - 1 + mCur) % mCur];
-	}
-	void show()
-	{
-		if (rear == front)
-		{
-			throw std::underflow_error("队列为空");
-		}
-		for (int i = front;i != rear;i = (i + 1) % mCur)
-		{
-			cout << arr[i] << ' ';
-		}
-		cout << endl;
+		return sum;
 	}
 };
-
 int main()
 {
-	queue MyQueue;
-	MyQueue.push(100);
-	MyQueue.show();
-	MyQueue.pop();
+	LinkQueue que;
+	int arr[10] = { 100,20,30,60,42,52,10,5,10,65 };
+	for (int i = 0;i < 10;i++)
+	{
+		que.push(arr[i]);
+	}
+	while (!que.empty())
+	{
+		cout << que.front() << ' ' << que.back() << endl;
+		que.pop();
+	}
 }
